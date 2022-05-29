@@ -50,10 +50,20 @@ async def p(ctx, msg):
             playRoop[server] = False
             playRandom[server] = False
             await channel.connect()
-        elif channel != client.voice_clients[0].channel:
-            titleMsg = str(client.voice_clients[0].channel) + " 채널에 연결되어 있습니다."
-            await ctx.send(embed=discord.Embed(title=titleMsg))
-            return
+        else :
+            serverCheck = False
+            for voice_client in client.voice_clients :
+                if voice_client.guild.id == server:
+                    if channel != voice_client.channel:
+                        itleMsg = str(voice_client.channel) + " 채널에 연결되어 있습니다."
+                        await ctx.send(embed=discord.Embed(title=titleMsg))
+                        return
+                    else:
+                        serverCheck = True
+            if not serverCheck :
+                playRoop[server] = False
+                playRandom[server] = False
+                await channel.connect()
         
         driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()))
         if (msg.startswith("http")):
@@ -75,7 +85,10 @@ async def p(ctx, msg):
             playlist[server] = [url]
             playlistTitle[server] = [videoTitle]
         await ctx.send(embed=discord.Embed(title='노래 추가',description=videoTitle))
-        voice = client.voice_clients[0]
+        driver.quit()
+        for voice_client in client.voice_clients :
+            if voice_client.guild.id == server :
+                voice =  voice_client
         if not voice.is_playing() and not voice.is_paused():
             while True:
                 await songStart(ctx, voice)
@@ -103,14 +116,23 @@ async def l(ctx):
     if server in playlistTitle:
         if 0 < len(playlistTitle[server]):
             list = ""
+            num = 0
             for i in playlistTitle[server]:
-                list += i
-                list += "\n"
+                num += 1
+                list += str(num) + ". " + i + "\n"
             await ctx.send(embed=discord.Embed(title='예약 목록',description=list))   
         else:
             await ctx.send(embed=discord.Embed(title='예약 목록이 없습니다.')) 
     else:
         await ctx.send(embed=discord.Embed(title='예약 목록이 없습니다.'))
+
+@client.command()
+async def now(ctx):
+    server = ctx.guild.id
+    if server in nowSong:
+        await ctx.send(embed=discord.Embed(title='Now Playing',description=nowSong[server]))
+    else:
+        await ctx.send(embed=discord.Embed(title='재생 중인 노래가 없습니다.',description=nowSong[server]))
 
 @client.command()
 async def kick(ctx):
@@ -123,7 +145,9 @@ async def kick(ctx):
         del playRandom[server]
     if server in nowSong:
         del nowSong[server]
-    await client.voice_clients[0].disconnect()
+    for voice_client in client.voice_clients :
+        if voice_client.guild.id == server :
+            await voice_client.disconnect()
 
 @client.command()
 async def re(ctx):
@@ -167,6 +191,7 @@ async def help(ctx):
     list += ";p : 노래 재생 또는 예약 \n"
     list += ";c : 반복 재생 취소 또는 재생 중인 노래 취소 \n"
     list += ";l : 예약 된 노래 목록 확인 \n"
+    list += ";now : 현재 재생 중인 노래 확인 \n"
     list += ";kick : 봇 강제 퇴장 및 초기화\n"
     list += ";re : 반복 재생\n"
     list += ";랜덤 : 무작위 순서로 노래 재생\n"
