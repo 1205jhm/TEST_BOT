@@ -28,12 +28,12 @@ async def songStart(ctx, voice):
             if not playRoop[server]:
                 if playRandom[server]:
                     num = random.randrange(0,len(playlist[server])-1)
-                    nowSong[server] = playlist[server].pop(num)
-                    playlistTitle[server].pop(num)
+                    nowUrl = playlist[server].pop(num)
+                    nowSong[server] = playlistTitle[server].pop(num)
                 else:
-                    nowSong[server] = playlist[server].pop(0)
-                    playlistTitle[server].pop(0)
-            info = ydl.extract_info(nowSong[server], download=False)
+                    nowUrl = playlist[server].pop(0)
+                    nowSong[server] = playlistTitle[server].pop(0)
+            info = ydl.extract_info(nowUrl, download=False)
             URL = info['formats'][0]['url']
         voice.play(discord.FFmpegPCMAudio(URL, **FFMPEG_OPTIONS))
     while voice.is_playing() or voice.is_paused():
