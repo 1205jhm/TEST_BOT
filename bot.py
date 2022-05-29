@@ -1,12 +1,20 @@
 import asyncio
+from ctypes.wintypes import MSG
 from discord.ext import commands
 import youtube_dl
 import discord
 import random
+import requests
+from bs4 import BeautifulSoup
+from selenium import webdriver
+from selenium.webdriver.chrome.service import Service
+from webdriver_manager.chrome import ChromeDriverManager
+import urllib
 
 client = commands.Bot(command_prefix=';', help_command=None)
 
 playlist = {}
+playlistTitle = {}
 playRoop = {}
 playRandom = {}
 nowSong = {}
@@ -21,8 +29,10 @@ async def songStart(ctx, voice):
                 if playRandom[server]:
                     num = random.randrange(0,len(playlist[server])-1)
                     nowSong[server] = playlist[server].pop(num)
+                    playlistTitle[server].pop(num)
                 else:
                     nowSong[server] = playlist[server].pop(0)
+                    playlistTitle[server].pop(0)
             info = ydl.extract_info(nowSong[server], download=False)
             URL = info['formats'][0]['url']
         voice.play(discord.FFmpegPCMAudio(URL, **FFMPEG_OPTIONS))
@@ -30,7 +40,7 @@ async def songStart(ctx, voice):
         await asyncio.sleep(0.1)
 
 @client.command()
-async def p(ctx, url):
+async def p(ctx, msg):
     server = ctx.guild.id
     if ctx.author.voice is None:
         await ctx.send(embed=discord.Embed(title='연결 된 음성 채널이 없습니다.'))
@@ -44,11 +54,25 @@ async def p(ctx, url):
             titleMsg = str(client.voice_clients[0].channel) + " 채널에 연결되어 있습니다."
             await ctx.send(embed=discord.Embed(title=titleMsg))
             return
+        
+        driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()))
+        if (msg.startswith("http")):
+            driver.get(msg)
+            soup = BeautifulSoup(driver.page_source, "html.parser")
+            videoTitle = soup.select("#container > h1 > yt-formatted-string").get_text()
+            url = msg
+        else:
+            driver.get("https://www.youtube.com/results?search_query=" + urllib.parse.quote(msg))
+            soup = BeautifulSoup(driver.page_source, "html.parser")
+            videoTitle = soup.select("#video-title>yt-formatted-string")[0].get_text();
+            url = "https://www.youtube.com" + soup.select("#video-title")[0]["href"]
         if server in playlist:
             playlist[server].append(url)
+            playlistTitle[server].append(videoTitle)
         else:
             playlist[server] = [url]
-        await ctx.send(embed=discord.Embed(title='노래 추가',description=url))
+            playlistTitle[server] = [videoTitle]
+        await ctx.send(embed=discord.Embed(title='노래 추가',description=videoTitle))
         voice = client.voice_clients[0]
         if not voice.is_playing() and not voice.is_paused():
             while True:
@@ -74,10 +98,10 @@ async def c(ctx):
 @client.command()
 async def l(ctx):
     server = ctx.guild.id
-    if server in playlist:
-        if 0 < len(playlist[server]):
+    if server in playlistTitle:
+        if 0 < len(playlistTitle[server]):
             list = ""
-            for i in playlist[server]:
+            for i in playlistTitle[server]:
                 list += i
                 list += "\n"
             await ctx.send(embed=discord.Embed(title='예약 목록',description=list))   
