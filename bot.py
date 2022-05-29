@@ -1,10 +1,10 @@
 import asyncio
 from ctypes.wintypes import MSG
+from time import sleep
 from discord.ext import commands
 import youtube_dl
 import discord
 import random
-import requests
 from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
@@ -58,11 +58,13 @@ async def p(ctx, msg):
         driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()))
         if (msg.startswith("http")):
             driver.get(msg)
+            sleep(1)
             soup = BeautifulSoup(driver.page_source, "html.parser")
-            videoTitle = soup.select("#container > h1 > yt-formatted-string").get_text()
+            videoTitle = soup.select("#container>h1>yt-formatted-string")[0].get_text()
             url = msg
         else:
             driver.get("https://www.youtube.com/results?search_query=" + urllib.parse.quote(msg))
+            sleep(1)
             soup = BeautifulSoup(driver.page_source, "html.parser")
             videoTitle = soup.select("#video-title>yt-formatted-string")[0].get_text();
             url = "https://www.youtube.com" + soup.select("#video-title")[0]["href"]
