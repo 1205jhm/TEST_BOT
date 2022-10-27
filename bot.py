@@ -20,16 +20,6 @@ playRandom = {}
 nowSong = {}
 nowUrl = {}
 
-formatter = logging.Formatter(u"%(asctime)s [%(levelname)8s] %(message)s")
-
-log = logging.getLogger("bot")
-log.setLevel(logging.INFO)
-file_handler = logging.handlers.TimedRotatingFileHandler(filename="./logs/msglog.txt", when="midnight", interval=1, encoding="utf-16")
-file_handler.setFormatter(formatter)
-file_handler.suffix = "%Y%m%d"
-log.addHandler(file_handler)
-
-
 async def songStart(ctx, voice):
     server = ctx.guild.id
     if not voice.is_playing() and not voice.is_paused():
