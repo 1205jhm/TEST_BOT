@@ -1,7 +1,6 @@
 import asyncio
 from asyncio.windows_events import NULL
 import json
-import logging.handlers
 import re
 from time import sleep
 from discord.ext import commands
