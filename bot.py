@@ -1,5 +1,6 @@
 import asyncio
 from asyncio.windows_events import NULL
+import json
 import logging.handlers
 import re
 from time import sleep
@@ -10,11 +11,11 @@ from youtubesearchpython import *
 import discord
 import random
 
-client = commands.Bot(command_prefix=";", help_command=None)
+client = commands.Bot(command_prefix="!", help_command=None, intents=discord.Intents.all())
 
 playlist = {}
 playlistTitle = {}
-playRoop = {}
+playLoop = {}
 playRandom = {}
 nowSong = {}
 nowUrl = {}
@@ -35,7 +36,7 @@ async def songStart(ctx, voice):
         ydl_opts = {"format": "bestaudio"}
         FFMPEG_OPTIONS = {"before_options": "-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5", "options": "-vn"}
         with youtube_dl.YoutubeDL(ydl_opts) as ydl:
-            if not playRoop[server]:
+            if not playLoop[server]:
                 if playRandom[server]:
                     num = random.randrange(0,len(playlist[server])-1)
                     nowUrl[server] = playlist[server].pop(num)
@@ -57,7 +58,7 @@ async def tts(ctx, msg):
     else:
         channel = ctx.author.voice.channel
         if client.voice_clients == []:
-            playRoop[server] = False
+            playLoop[server] = False
             playRandom[server] = False
             await channel.connect()
         else:
@@ -71,7 +72,7 @@ async def tts(ctx, msg):
                     else:
                         serverCheck = True
             if not serverCheck:
-                playRoop[server] = False
+                playLoop[server] = False
                 playRandom[server] = False
                 await channel.connect()
         for voice_client in client.voice_clients:
@@ -92,7 +93,7 @@ async def p(ctx, msg):
     else:
         channel = ctx.author.voice.channel
         if client.voice_clients == []:
-            playRoop[server] = False
+            playLoop[server] = False
             playRandom[server] = False
             await channel.connect()
         else:
@@ -106,7 +107,7 @@ async def p(ctx, msg):
                     else:
                         serverCheck = True
             if not serverCheck:
-                playRoop[server] = False
+                playLoop[server] = False
                 playRandom[server] = False
                 await channel.connect()
         videos = VideosSearch(msg, limit = 1, language = "ko", region = "KR").result()["result"]
@@ -123,10 +124,10 @@ async def p(ctx, msg):
             list = Playlist(msg)
             for video in list.videos:
                 if server in playlist:
-                    playlist[server].append(video["link"].split("&list=PL")[0])
+                    playlist[server].append(video["link"].split("&list=")[0])
                     playlistTitle[server].append(video["title"])
                 else:
-                    playlist[server] = [video["link"].split("&list=PL")[0]]
+                    playlist[server] = [video["link"].split("&list=")[0]]
                     playlistTitle[server] = [video["title"]]
             await ctx.send(embed=discord.Embed(title="플레이리스트 추가",description=list.info["info"]["title"]))
         for voice_client in client.voice_clients:
@@ -135,7 +136,7 @@ async def p(ctx, msg):
         if not voice.is_playing() and not voice.is_paused():
             while True:
                 await songStart(ctx, voice)
-                if ((server in playlist) and 0 < len(playlist[server])) or ((server in playRoop) and playRoop[server]):
+                if ((server in playlist) and 0 < len(playlist[server])) or ((server in playLoop) and playLoop[server]):
                     continue
                 break
             if server in nowSong:
@@ -149,8 +150,8 @@ async def c(ctx, msg=""):
                 voice =  voice_client
     if(msg == ""):
         if voice.is_playing():
-            if playRoop[server]:
-                playRoop[server] = False
+            if playLoop[server]:
+                playLoop[server] = False
                 await ctx.send(embed=discord.Embed(title="반복 재생 종료"))
             else:
                 voice.stop()
@@ -198,8 +199,8 @@ async def kick(ctx):
         del playlist[server]
     if server in playlistTitle:
         del playlistTitle[server]
-    if server in playRoop:
-        del playRoop[server]
+    if server in playLoop:
+        del playLoop[server]
     if server in playRandom:
         del playRandom[server]
     if server in nowSong:
@@ -211,11 +212,11 @@ async def kick(ctx):
             await voice_client.disconnect()
 
 @client.command()
-async def roop(ctx):
+async def loop(ctx):
     server = ctx.guild.id
     if server in nowSong:
-        if not playRoop[server]:
-            playRoop[server] = True
+        if not playLoop[server]:
+            playLoop[server] = True
             await ctx.send(embed=discord.Embed(title="반복 재생 시작"))
         else:
             await ctx.send(embed=discord.Embed(title="이미 반복 재생 중입니다."))
@@ -249,15 +250,15 @@ async def 랜덤취소(ctx):
 @client.command()
 async def help(ctx):
     list = ""
-    list += ";p: 노래 재생 또는 예약 \n"
-    list += ";c: 반복 재생 취소, 재생 중인 노래 취소, 예약된 노래 취소 (ex. ;c 1 = 1번 예약곡 취소)\n"
-    list += ";list: 예약 된 노래 목록 확인 \n"
-    list += ";now: 현재 재생 중인 노래 확인 \n"
-    list += ";kick: 봇 강제 퇴장 및 초기화\n"
-    list += ";roop: 반복 재생\n"
-    list += ";랜덤: 무작위 순서로 노래 재생\n"
-    list += ";랜덤취소: 무작위 순서로 노래 재생 취소 (순차 재생)\n"
-    list += ";tts: 음성합성기능"
+    list += "!p: 노래 재생 또는 예약 \n"
+    list += "!c: 반복 재생 취소, 재생 중인 노래 취소, 예약된 노래 취소 (ex. ;c 1 = 1번 예약곡 취소)\n"
+    list += "!list: 예약 된 노래 목록 확인 \n"
+    list += "!now: 현재 재생 중인 노래 확인 \n"
+    list += "!kick: 봇 강제 퇴장 및 초기화\n"
+    list += "!loop: 반복 재생\n"
+    list += "!랜덤: 무작위 순서로 노래 재생\n"
+    list += "!랜덤취소: 무작위 순서로 노래 재생 취소 (순차 재생)\n"
+    list += "!tts: 음성합성기능"
     await ctx.send(embed=discord.Embed(title="명령어 목록",description=list))   
 
 @client.event
@@ -270,4 +271,7 @@ async def on_message(msg):
         log.info(server + " | " + channel + " | " + writer + " | " + message)
         await client.process_commands(msg)
 
-client.run("ODcxNzMwMDI3ODc0NjM1Nzk3.YQfj2g.5nm_WQyv2iN06aZS2W_Ac8JLAuA")
+with open('config.json') as f :
+    config = json.load(f)
+
+client.run(config['token'])
