@@ -110,7 +110,11 @@ async def p(ctx, msg):
                 playlistTitle[server] = [video["title"]]
             await ctx.send(embed=discord.Embed(title="노래 추가",description=video["title"]))
         elif re.search(r"(?<=list=)([a-zA-Z0-9+/=_-]+)", msg) != None:
-            list = Playlist(msg)
+            try:
+                list = Playlist(msg)
+            except:
+                await ctx.send(embed=discord.Embed(title="죄송합니다",description="유튜브 믹스는 지원하지 않습니다.\n만약 믹스가 아니라면 주소를 다시 확인해주세요."))
+                return
             for video in list.videos:
                 if server in playlist:
                     playlist[server].append(video["link"].split("&list=")[0])
@@ -248,17 +252,7 @@ async def help(ctx):
     list += "!랜덤: 무작위 순서로 노래 재생\n"
     list += "!랜덤취소: 무작위 순서로 노래 재생 취소 (순차 재생)\n"
     list += "!tts: 음성합성기능"
-    await ctx.send(embed=discord.Embed(title="명령어 목록",description=list))   
-
-@client.event
-async def on_message(msg):
-    if msg.author != client.user:
-        server = msg.guild.name
-        channel = msg.channel.name
-        writer = msg.author.name + "#" + msg.author.discriminator
-        message = msg.content
-        log.info(server + " | " + channel + " | " + writer + " | " + message)
-        await client.process_commands(msg)
+    await ctx.send(embed=discord.Embed(title="명령어 목록",description=list))
 
 with open('config.json') as f :
     config = json.load(f)
