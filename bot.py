@@ -1,8 +1,10 @@
 import asyncio
 from asyncio.windows_events import NULL
 import json
+from msilib.schema import Error
 import re
 from time import sleep
+from tkinter import E
 from discord.ext import commands
 from gtts import gTTS
 import youtube_dl
@@ -113,8 +115,9 @@ async def p(ctx, msg):
             try:
                 list = Playlist(msg)
             except:
-                await ctx.send(embed=discord.Embed(title="죄송합니다",description="유튜브 믹스는 지원하지 않습니다.\n만약 믹스가 아니라면 주소를 다시 확인해주세요."))
-                return
+                if (not(videos in list)):
+                    await ctx.send(embed=discord.Embed(title="죄송합니다",description="유튜브 믹스는 지원하지 않습니다.\n만약 믹스가 아니라면 주소를 다시 확인해주세요."))
+                    return
             for video in list.videos:
                 if server in playlist:
                     playlist[server].append(video["link"].split("&list=")[0])
@@ -151,13 +154,13 @@ async def c(ctx, msg=""):
                 await ctx.send(embed=discord.Embed(title="재생 취소",description=nowSong[server]))
         else:
             await ctx.send(embed=discord.Embed(title="재생 중인 노래가 없습니다."))
-    elif (msg > 0):
-        if (msg > len(playlist[server])):
-            await ctx.send(embed=discord.Embed(title=str(msg) + "번에 해당하는 예약곡이 없습니다."))
+    elif (int(msg) > 0):
+        if (int(msg) > len(playlist[server])):
+            await ctx.send(embed=discord.Embed(title=msg + "번에 해당하는 예약곡이 없습니다."))
         else:
-            playlist[server].pop(msg-1)
-            deleteSong = playlistTitle[server].pop(msg-1)
-            await ctx.send(embed=discord.Embed(title="예약 취소",description=str(msg) + ". " + deleteSong))
+            playlist[server].pop(int(msg)-1)
+            deleteSong = playlistTitle[server].pop(int(msg)-1)
+            await ctx.send(embed=discord.Embed(title="예약 취소",description=msg + ". " + deleteSong))
     else:
         await ctx.send(embed=discord.Embed(title="잘못된 명령인수입니다."))
 
