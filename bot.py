@@ -260,6 +260,7 @@ async def help(ctx):
     list += "!loop: 반복 재생\n"
     list += "!랜덤: 무작위 순서로 노래 재생\n"
     list += "!랜덤취소: 무작위 순서로 노래 재생 취소 (순차 재생)\n"
+    list += "!clear: 메시지 삭제 (ex. !clear 10 = 메시지 10개 삭제)\n"
     # list += "!tts: 음성합성기능"
     await ctx.send(embed=discord.Embed(title="명령어 목록",description=list))
 
