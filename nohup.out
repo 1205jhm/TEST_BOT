@@ -1,6 +1,0 @@
-Traceback (most recent call last):
-  File "/data/TEST_BOT/bot.py", line 259, in <module>
-    with open('./config.json') as f :
-FileNotFoundError: [Errno 2] No such file or directory: './config.json'
-[2022-12-27 18:08:04] [INFO    ] discord.client: logging in using static token
-[2022-12-27 18:08:05] [INFO    ] discord.gateway: Shard ID None has connected to Gateway (Session ID: 0e29bcc1599f9d67bd86b7783fcd837c).
