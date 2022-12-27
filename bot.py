@@ -1,12 +1,11 @@
 import asyncio
-from asyncio.windows_events import NULL
 import json
-from msilib.schema import Error
+#from msilib.schema import Error
 import re
 from time import sleep
-from tkinter import E
+#from tkinter import E
 from discord.ext import commands
-from gtts import gTTS
+#from gtts import gTTS
 import youtube_dl
 from youtubesearchpython import *
 import discord
@@ -257,7 +256,7 @@ async def help(ctx):
     list += "!tts: 음성합성기능"
     await ctx.send(embed=discord.Embed(title="명령어 목록",description=list))
 
-with open('config.json') as f :
+with open('../config.json') as f :
     config = json.load(f)
 
 client.run(config['token'])
