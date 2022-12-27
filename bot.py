@@ -256,7 +256,7 @@ async def help(ctx):
     list += "!tts: 음성합성기능"
     await ctx.send(embed=discord.Embed(title="명령어 목록",description=list))
 
-with open('../config.json') as f :
+with open('./config.json') as f :
     config = json.load(f)
 
 client.run(config['token'])
