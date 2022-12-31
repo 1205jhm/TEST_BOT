@@ -76,7 +76,7 @@ async def songStart(ctx, voice):
 #             voice.play(discord.FFmpegPCMAudio(source="./tts.mp3"))
 
 @client.command()
-async def clear(ctx, msg):
+async def c(ctx, msg):
     await ctx.channel.purge(limit=int(msg) + 1)
     noti = await ctx.send(embed=discord.Embed(title=msg + "개의 메시지를 삭제했습니다.",description="이 메시지는 3초 후 사라집니다."))
     await asyncio.sleep(3)
@@ -145,7 +145,7 @@ async def p(ctx, msg):
                 del nowSong[server]
 
 @client.command()
-async def c(ctx, msg=""):
+async def s(ctx, msg=""):
     server = ctx.guild.id
     for voice_client in client.voice_clients:
             if voice_client.guild.id == server:
@@ -253,14 +253,14 @@ async def 랜덤취소(ctx):
 async def help(ctx):
     list = ""
     list += "!p: 노래 재생 또는 예약 \n"
-    list += "!c: 반복 재생 취소, 재생 중인 노래 취소, 예약 취소 (ex. !c 1 = 1번 예약곡 취소)\n"
+    list += "!s: 반복 재생 취소, 재생 중인 노래 취소, 예약 취소 (ex. !s 1 = 1번 예약곡 취소)\n"
     list += "!list: 예약 된 노래 목록 확인 \n"
     list += "!now: 현재 재생 중인 노래 확인 \n"
     list += "!kick: 봇 강제 퇴장 및 초기화\n"
     list += "!loop: 반복 재생\n"
     list += "!랜덤: 무작위 순서로 노래 재생\n"
     list += "!랜덤취소: 무작위 순서로 노래 재생 취소 (순차 재생)\n"
-    list += "!clear: 메시지 삭제 (ex. !clear 10 = 메시지 10개 삭제)\n"
+    list += "!c: 메시지 삭제 (ex. !c 10 = 메시지 10개 삭제)\n"
     # list += "!tts: 음성합성기능"
     await ctx.send(embed=discord.Embed(title="명령어 목록",description=list))
 
