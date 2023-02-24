@@ -1,12 +1,10 @@
 import asyncio
 import json
-#from msilib.schema import Error
 import re
 from time import sleep
-#from tkinter import E
 from discord.ext import commands
-#from gtts import gTTS
-import youtube_dl
+from gtts import gTTS
+import yt_dlp
 from youtubesearchpython import *
 import discord
 import random
@@ -25,7 +23,7 @@ async def songStart(ctx, voice):
     if not voice.is_playing() and not voice.is_paused():
         ydl_opts = {"format": "bestaudio"}
         FFMPEG_OPTIONS = {"before_options": "-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5", "options": "-vn"}
-        with youtube_dl.YoutubeDL(ydl_opts) as ydl:
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             if not playLoop[server]:
                 if playRandom[server]:
                     num = random.randrange(0,len(playlist[server])-1)
@@ -35,45 +33,45 @@ async def songStart(ctx, voice):
                     nowUrl[server] = playlist[server].pop(0)
                     nowSong[server] = playlistTitle[server].pop(0)
             info = ydl.extract_info(nowUrl[server], download=False)
-            URL = info["formats"][0]["url"]
+            URL = info["url"]
         voice.play(discord.FFmpegPCMAudio(URL, **FFMPEG_OPTIONS))
     while voice.is_playing() or voice.is_paused():
         await asyncio.sleep(0.5)
 
-# @client.command()
-# async def tts(ctx, msg):
-#     server = ctx.guild.id
-#     if ctx.author.voice is None:
-#         await ctx.send(embed=discord.Embed(title="연결 된 음성 채널이 없습니다."))
-#     else:
-#         channel = ctx.author.voice.channel
-#         if client.voice_clients == []:
-#             playLoop[server] = False
-#             playRandom[server] = False
-#             await channel.connect()
-#         else:
-#             serverCheck = False
-#             for voice_client in client.voice_clients:
-#                 if voice_client.guild.id == server:
-#                     if channel != voice_client.channel:
-#                         titleMsg = str(voice_client.channel) + " 채널에 연결되어 있습니다."
-#                         await ctx.send(embed=discord.Embed(title=titleMsg))
-#                         return
-#                     else:
-#                         serverCheck = True
-#             if not serverCheck:
-#                 playLoop[server] = False
-#                 playRandom[server] = False
-#                 await channel.connect()
-#         for voice_client in client.voice_clients:
-#             if voice_client.guild.id == server:
-#                 voice =  voice_client
-#         if(voice.is_playing()):
-#             await ctx.send(embed=discord.Embed(title="재생 중인 파일이 있습니다."))
-#         else:
-#             tts = gTTS(text=msg, lang="ko")
-#             tts.save("./tts.mp3")
-#             voice.play(discord.FFmpegPCMAudio(source="./tts.mp3"))
+@client.command()
+async def tts(ctx, msg):
+    server = ctx.guild.id
+    if ctx.author.voice is None:
+        await ctx.send(embed=discord.Embed(title="연결 된 음성 채널이 없습니다."))
+    else:
+        channel = ctx.author.voice.channel
+        if client.voice_clients == []:
+            playLoop[server] = False
+            playRandom[server] = False
+            await channel.connect()
+        else:
+            serverCheck = False
+            for voice_client in client.voice_clients:
+                if voice_client.guild.id == server:
+                    if channel != voice_client.channel:
+                        titleMsg = str(voice_client.channel) + " 채널에 연결되어 있습니다."
+                        await ctx.send(embed=discord.Embed(title=titleMsg))
+                        return
+                    else:
+                        serverCheck = True
+            if not serverCheck:
+                playLoop[server] = False
+                playRandom[server] = False
+                await channel.connect()
+        for voice_client in client.voice_clients:
+            if voice_client.guild.id == server:
+                voice =  voice_client
+        if(voice.is_playing()):
+            await ctx.send(embed=discord.Embed(title="재생 중인 파일이 있습니다."))
+        else:
+            tts = gTTS(text=msg, lang="ko")
+            tts.save("./tts.mp3")
+            voice.play(discord.FFmpegPCMAudio(source="./tts.mp3"))
 
 @client.command()
 async def c(ctx, msg):
@@ -261,7 +259,7 @@ async def help(ctx):
     list += "!랜덤: 무작위 순서로 노래 재생\n"
     list += "!랜덤취소: 무작위 순서로 노래 재생 취소 (순차 재생)\n"
     list += "!c: 메시지 삭제 (ex. !c 10 = 메시지 10개 삭제)\n"
-    # list += "!tts: 음성합성기능"
+    list += "!tts: 음성합성기능"
     await ctx.send(embed=discord.Embed(title="명령어 목록",description=list))
 
 with open('./config.json') as f :
