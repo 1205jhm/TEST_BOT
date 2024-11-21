@@ -21,7 +21,7 @@ nowUrl = {}
 async def songStart(ctx, voice):
     server = ctx.guild.id
     if not voice.is_playing() and not voice.is_paused():
-        ydl_opts = {"format": "bestaudio"}
+        ydl_opts = {"format": "bestaudio", "verbose": True }
         FFMPEG_OPTIONS = {"before_options": "-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5", "options": "-vn"}
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             if not playLoop[server]:
